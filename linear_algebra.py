@@ -39,6 +39,7 @@ def orthonormalize(matrix):
   return numpy_orthonormalized_vectors
 
 def get_geometric_multiplicity(matrix, eigenvalue):
+  """ still needs work """
   if is_square(matrix):
     matrix = Matrix(matrix)
     eigenvectors = matrix.eigenvects()
@@ -56,7 +57,15 @@ def get_algebraic_multiplicity(matrix, eigenvalue):
   else:
     raise Exception('not a square matrix')
 
+def is_diagonalizable(matrix):
+  """ still needs work """
+  if get_algebraic_multiplicity(matrix) == get_geometric_multiplicity(matrix):
+    return True
+  else:
+    return False
+
 # create numpy matrix
 matrix = np.array([[3, -2,  4, -2], [5,  3, -3, -2], [5, -2,  2, -2], [5, -2, -3,  3]])
-print(get_algebraic_multiplicity(matrix, 3))
-print(orthonormalize(matrix))
+print(get_geometric_multiplicity(matrix, 3))
+# print(orthonormalize(matrix))
+# print(is_diagonalizabe(matrix))
