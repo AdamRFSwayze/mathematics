@@ -5,6 +5,7 @@ class MarkovChain:
     *TODO
     - add function to apply boundary conditions
     - add function to auto-generate P
+    """
 
     def __init__(self, P, phi):
         """

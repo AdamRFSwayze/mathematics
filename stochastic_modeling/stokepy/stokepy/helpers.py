@@ -1,3 +1,5 @@
+from .headers import *
+
 def architecture_check_passed(P, phi):
     """ Make sure columns of the transition matrix, P, (which represent the
     number of states) match the number of elements in the initial distribution,
@@ -14,7 +16,7 @@ def architecture_check_passed(P, phi):
         return False
     return True
 
-def compute_absorbed_proportions(self, vector, states_in_recurrent_classes = []):
+def compute_absorbed_proportions(vector, states_in_recurrent_classes = []):
     """ return numpy array of absorbed proportions for each recurrent state """
     if states_in_recurrent_classes == []:
         ap = [1.0]
@@ -38,7 +40,7 @@ def normalize_vector(vector):
 def normalize_rows(transition_matrix):
     return np.apply_along_axis(normalize_vector, 1, transition_matrix)
 
-def plot_absorption(self, absorption_proportions, tolerance = 0.001):
+def get_newly_absorbed_proportions(absorption_proportions, tolerance):
     absorption_proportions = np.array(absorption_proportions)
     # total absorbed by all recurrent classes
     absorbed_cumulative = np.sum(absorption_proportions, axis = 1)
@@ -50,13 +52,15 @@ def plot_absorption(self, absorption_proportions, tolerance = 0.001):
     absorbed_marginal = np.diff(absorbed_cumulative)
     # np.diff shrinks array by 1 entry so prepend 0.0
     absorbed_marginal = np.insert(absorbed_marginal, 0, absorbed_cumulative[0])
+    return absorbed_marginal
+
+def plot_absorption_helper(absorption_proportions, tolerance):
+    absorbed_marginal = get_newly_absorbed_proportions(absorption_proportions, \
+                        tolerance)
     times = np.arange(absorbed_marginal.shape[0])
-    printltx(r"Absorbed proportions (by recurrent class) " + ltxmtx(absorption_proportions[-1]))
     plt.bar(times, absorbed_marginal)
     plt.xlabel('jumps')
     plt.ylabel('proportion')
     plt.title('Distribution of Absorption Times')
     plt.show()
-    average = absorbed_marginal.dot(times)
-    printltx(r"Mean absorption time is "+str(average))
     return None

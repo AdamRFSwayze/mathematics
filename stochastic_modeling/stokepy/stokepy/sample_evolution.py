@@ -1,28 +1,46 @@
-from headers import *
+from .headers import *
+from .helpers import *
 
 class SampleEvolution:
 
-    def __init__(self, markov_chain, samples, steps, states, memory, rec_class_states, tol):
+    def __init__(self, markov_chain, samples, steps, rec_class_states, \
+                 memory = 10, tolerance = 0.001):
         """
         markov_chain is a MarkovChain object
+
+        memory and tolerance are optional parameters
         """
-        self.markov_chain.P              = P
-        self.markov_chain.phi            = phi
+        self.P                           = markov_chain.P
+        self.phi                         = markov_chain.phi
         self.num_of_steps                = steps
         self.memory                      = memory
-        self.num_of_states               = states
+        self.num_of_states               = markov_chain.phi.shape[0]
         self.num_of_samples              = samples
         self.states_in_recurrent_classes = rec_class_states
-        self.tolerance                   = tol
+        self.tolerance                   = tolerance
 
-    def sample_evolution(self, initial_parameters):
+        # place to store values returned from simulation
+        self.epdf = None
+        # average distribution
+        self.pi = None
+        # absorption proportions for plotting
+        self.absorption_proportions = None
+
+
+        self.absorbed_proportions_by_recurrent_class = None
+        self.mean_absorption_time = None
+
+    def plot_absorption(self):
+        plot_absorption_helper(self.absorption_proportions, self.tolerance)
+
+    def run(self):
         """
         Evolves the system by simulating many sample paths
         """
         ### -------------- set stage for simulation -------------- ###
         # create empirical probability distribution function
         epdf    = np.zeros([self.memory, self.num_of_states], dtype = float)
-        # initial the epdf by writing the initial distribution matrix to epdf
+        # initialize the epdf by writing the initial distribution matrix to epdf
         epdf[0] = self.phi[:]
         ap = compute_absorbed_proportions(self.phi, self.states_in_recurrent_classes)
         absorption_proportions = [ap]
@@ -32,7 +50,7 @@ class SampleEvolution:
         # we want to plot the full distribution, over ALL time.
         # The problem is that we don't actually know how many steps it will take for complete
         # (or almost complete) absorption. So, we cannot pre-allocate the size of
-        # absorption_propotions (in contrast to epdf, where we can pre-allocate).
+        # absorption_proportions (in contrast to epdf, where we can pre-allocate).
         # Therefore, we are stuck "growing the array" (as far as I can tell).
 
         scaled_phi        = np.rint(self.phi * self.num_of_samples).astype(int)
@@ -80,4 +98,16 @@ class SampleEvolution:
         # so, the following code rearranges the rows of the matrix to make sure the final distribution is on bottom
         epdf = np.roll(epdf, self.memory - next_step - 1, axis = 0)
         # plot_absorption(absorption_proportions, tolerance = self.tolerance)
-        return epdf
+
+        ### -------- set results -------- ###
+        self.epdf = epdf
+        self.pi   = np.mean(epdf, 0)
+        self.absorption_proportions = absorption_proportions
+        self.absorbed_proportions_by_recurrent_class = absorption_proportions[-1]
+
+        # get mean absorption time
+        absorbed_marginal = get_newly_absorbed_proportions(\
+                            self.absorption_proportions, self.tolerance)
+        times = np.arange(absorbed_marginal.shape[0])
+        self.mean_absorption_time = absorbed_marginal.dot(times)
+        return None
