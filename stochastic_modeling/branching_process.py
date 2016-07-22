@@ -23,7 +23,7 @@ def branching_process(samples, probs, colony_size_limit):
         while X < colony_size_limit:
             for i in range(X):
                 r = np.random.rand()
-                if 0 < r < prob_0_kids:
+                if 0 <= r < prob_0_kids:
                     X -= 1
                 if prob_0_kids < r < 1 - prob_1_kid:
                     X += 0
