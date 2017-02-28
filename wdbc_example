@@ -1,0 +1,47 @@
+
+#Principal Component Analysis Example using the wdbc data from UCI machine learning repository
+#https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/wdbc.data
+
+
+import csv
+import pandas as pd
+
+wdbc_url="https://archive.ics.uci.edu/ml/machine-learning-databases/breast-cancer-wisconsin/wdbc.data"
+data=pd.io.parsers.read_csv(wdbc_url, header=None)
+data=data.iloc[:,1:32]
+X=data.iloc[:,1:32]
+y=[y for y in data.iloc[:,0]]
+y
+
+------------------------------------------------------------------------
+#Finding the principal components
+
+
+import numpy as np
+from sklearn.decomposition import PCA as sklearnPCA
+from sklearn.preprocessing import StandardScaler
+
+data_std = StandardScaler().fit_transform(X)
+
+
+sklearn_pca = sklearnPCA()
+
+sklearn_pca.fit(data_std)
+covariance_matrix = sklearn_pca.get_covariance()
+
+eigenvectors = sklearn_pca.components_.T
+
+explained_variance = sklearn_pca.explained_variance_
+proportion_variance=[y/np.trace(covariance_matrix) for y in explained_variance]
+np.cumsum(sorted(proportion_variance))
+
+#This tells us in order to get 90% of the variance we need 7 principal comps
+
+sklearn_pca = sklearnPCA(n_components=7)
+
+
+smaller_data=pd.DataFrame(sklearn_pca.transform(data_std))
+smaller_data
+
+X.shape
+smaller_data.shape
